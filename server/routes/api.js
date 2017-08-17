@@ -1093,14 +1093,13 @@ router.post('/serviceCategoryInsertion', (req, res) => {
     
     
             // check same service name exists or not
-            bookingServiceCategoriesData.find({services:req.body.serviceName},(err, serviceCategories)=>{
+            bookingServiceCategoriesData.find({services:req.body.serviceName, gender: req.body.gender},(err, serviceCategories)=>{
                     if(serviceCategories.length > 0)
                     {
                         bookingServiceTypesData.find({serviceTypeName: req.body.serviceTypeName, serviceId: serviceCategories[0]._id },(err, checkServiceTypeName)=>{
                             if(checkServiceTypeName.length > 0) 
                             {
-                                res.json('record cant be inserted because same service type name already exists for this service.');
-                                
+                                res.json('record cant be inserted because same service type name already exists for this service.');                                
                             }
                             else
                             {
