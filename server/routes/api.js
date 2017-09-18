@@ -1232,6 +1232,65 @@ router.get('/removeModels', (req, res) => {
     res.json('models data removed');
 });
 
+// get profile info on profile edit page.
+router.get('/getProfileInfo', (req,res)=>{
+    const userData = require('../database/models/userRegistration');
+    userData.findOne({_id:req.session.loginId},(err,docs)=>{
+        if(err)
+        {
+            console.log('error occurred');
+            return false;
+        }
+        res.send(docs);
+    });    
+    
+});
+
+// update profile info
+router.post('/updateProfileInfo',(req,res)=>{
+    const userData = require('../database/models/userRegistration');
+    /* req.body.updatedValues.userId="598d917a734d1d2227f61103";
+    req.body.updatedValues.city="sdddfd";
+    req.body.updatedValues.email="sahil@gmail.com";
+    req.body.updatedValues.firstName="sahil";
+    req.body.updatedValues.lastName="jain";
+    req.body.updatedValues.phoneNumber="987629545";
+    req.body.updatedValues.state="Assam"; */
+    /* userData.find({},(err,data)=>{
+        console.log(data);
+    }); */
+
+    userData.findOne({_id:req.body.userId},(err,docs)=>{
+        if(err)
+        {
+            console.log('error');
+            return false;
+        }
+        console.log(docs);
+        if(req.body.city == docs.city && req.body.email == docs.email && req.body.firstName == docs.firstName && req.body.lastName == docs.lastName && req.body.phoneNumber == docs.phoneNumber && req.body.state == docs.state)
+        {
+            res.send('no change exists');
+        }
+        else
+        {
+            var conditions = { _id: req.body.userId }
+            , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber }            
+            , options = { multi: true };
+
+            userData.update(conditions, update, options, function(err,numAffected){                
+                if(numAffected.ok == 1 && numAffected.nModified == 1)
+                {
+                    res.send('changes exists');
+                }
+                else
+                {
+                    res.send('error');
+                }
+            });
+            
+        }
+    });
+});
 
 // router.get('/getLoginDetails', (req, res) => {
 //     const userLoginSchema = require('../database/models/userRegistration');
