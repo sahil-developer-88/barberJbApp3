@@ -1247,8 +1247,9 @@ router.get('/getProfileInfo', (req,res)=>{
 });
 
 // update profile info
-router.post('/updateProfileInfo',(req,res)=>{
+router.post('/updateProfile',(req,res)=>{
     const userData = require('../database/models/userRegistration');
+    var conditions, update, options;
     /* req.body.updatedValues.userId="598d917a734d1d2227f61103";
     req.body.updatedValues.city="sdddfd";
     req.body.updatedValues.email="sahil@gmail.com";
@@ -1259,6 +1260,12 @@ router.post('/updateProfileInfo',(req,res)=>{
     /* userData.find({},(err,data)=>{
         console.log(data);
     }); */
+    var result;
+
+    userData.findOne({_id:req.body.userId},(err,docs)=>{
+        console.log(docs);
+        
+    });
 
     userData.findOne({_id:req.body.userId},(err,docs)=>{
         if(err)
@@ -1267,26 +1274,61 @@ router.post('/updateProfileInfo',(req,res)=>{
             return false;
         }
         console.log(docs);
-        if(req.body.city == docs.city && req.body.email == docs.email && req.body.firstName == docs.firstName && req.body.lastName == docs.lastName && req.body.phoneNumber == docs.phoneNumber && req.body.state == docs.state)
+        if(req.body.city == docs.city && req.body.email == docs.email && req.body.firstName == docs.firstName && req.body.lastName == docs.lastName && req.body.phoneNumber == docs.phoneNumber && req.body.state == docs.state && req.body.newPassword == '')
         {
-            res.send('no change exists');
+            result={result:2};
+            res.send(result);
         }
         else
         {
-            var conditions = { _id: req.body.userId }
-            , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber }            
-            , options = { multi: true };
-
-            userData.update(conditions, update, options, function(err,numAffected){                
+            if(req.body.newPassword == '')
+            {
+                conditions = { _id: req.body.userId }
+                , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber }            
+                , options = { multi: true };
+                userData.update(conditions, update, options, function(err,numAffected){                
                 if(numAffected.ok == 1 && numAffected.nModified == 1)
                 {
-                    res.send('changes exists');
+                    result={result:1};
+                    res.send(result);
                 }
                 else
                 {
-                    res.send('error');
+                    result={result:0};
+                    res.send(result);                    
                 }
             });
+
+            }
+            else
+            {
+                var bcrypt = require('bcrypt');
+                const saltRounds = 10;
+                const myPlaintextPassword = req.body.newPassword;
+                
+                bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {                
+                    conditions = { _id: req.body.userId }
+                    , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber, password: hash }            
+                    , options = { multi: true };
+
+                    userData.update(conditions, update, options, function(err,numAffected){                
+                        if(numAffected.ok == 1 && numAffected.nModified == 1)
+                        {
+                            result={result:1};
+                            res.send(result);                             
+                        }
+                        else
+                        {
+                            result={result:0};
+                            res.send(result);
+                        }
+                    });      
+                });
+
+            }
+            
+
+            
             
         }
     });
