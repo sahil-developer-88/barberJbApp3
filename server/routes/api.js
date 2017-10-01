@@ -476,25 +476,29 @@ router.post('/login', (req, res) => {
 
 // this method calls during loading of page. (header.component.ts)
 router.get('/checkLogin', (req, res) => {
-    
-    var loginSessionValue;
+    const loginDetails = require('../database/models/userRegistration');
+    var loginSessionValue, name;
+    console.log(req.session);
     if (!req.session.loginSession) {
         // console.log(req.session.loginSession);
         req.session.loginSession = false;
 
         console.log(req.session.loginSession);
         loginSessionValue=false;
-        res.json(loginSessionValue);
+        var result={loginSessionValue: loginSessionValue, name: null};
+        res.send(result);
     }
     else {
         if (req.session.loginSession == true) {
             console.log(req.session.loginSession);
             loginSessionValue=true;
-            res.json(loginSessionValue);
+            loginDetails.findOne({_id:req.session.loginId},(err,docs)=>{
+                name=docs.firstName+' '+docs.lastName;
+                var result={loginSessionValue: loginSessionValue, name: name};
+                res.send(result);
+            });            
         }
-
     }
-
 });
 
 // this method calls by pressing of logout button.
@@ -1260,12 +1264,18 @@ router.post('/updateProfile',(req,res)=>{
     /* userData.find({},(err,data)=>{
         console.log(data);
     }); */
+    // console.log(req.body.userId);
+    // console.log(req.body.city);
+    // console.log(req.body.email);
+    // console.log(req.body.firstName);
+    // console.log(req.body.lastName);
+    // console.log(req.body.phoneNumber);
+    // console.log(req.body.state);
+    // console.log(req.body.newPassword); 
+
     var result;
 
-    userData.findOne({_id:req.body.userId},(err,docs)=>{
-        console.log(docs);
-        
-    });
+
 
     userData.findOne({_id:req.body.userId},(err,docs)=>{
         if(err)
@@ -1273,16 +1283,16 @@ router.post('/updateProfile',(req,res)=>{
             console.log('error');
             return false;
         }
-        console.log(docs);
-        if(req.body.city == docs.city && req.body.email == docs.email && req.body.firstName == docs.firstName && req.body.lastName == docs.lastName && req.body.phoneNumber == docs.phoneNumber && req.body.state == docs.state && req.body.newPassword == '')
+        
+        if(req.body.city == docs.city && req.body.email == docs.email && req.body.firstName == docs.firstName && req.body.lastName == docs.lastName && req.body.phoneNumber == docs.phoneNumber && req.body.state == docs.state && req.body.newPassword == null)
         {
             result={result:2};
             res.send(result);
         }
         else
-        {
-            if(req.body.newPassword == '')
-            {
+        {            
+            if(req.body.newPassword == null)
+            {                
                 conditions = { _id: req.body.userId }
                 , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber }            
                 , options = { multi: true };
@@ -1301,11 +1311,10 @@ router.post('/updateProfile',(req,res)=>{
 
             }
             else
-            {
+            {                
                 var bcrypt = require('bcrypt');
                 const saltRounds = 10;
-                const myPlaintextPassword = req.body.newPassword;
-                
+                const myPlaintextPassword = req.body.newPassword;                
                 bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {                
                     conditions = { _id: req.body.userId }
                     , update = { firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, city: req.body.city, state: req.body.state, phoneNumber: req.body.phoneNumber, password: hash }            
