@@ -282,102 +282,61 @@ return false;  */
 
 
 // get type of services corresponding to service id.
+// this method will be executed when data comes either from home page or by just clicking on service category on booking-service page.
 router.post('/getTypeOfServices', (req, res) => {
-    const bookingServiceTypesData = require('../database/models/serviceTypes');    
-    bookingServiceTypesData.find({ serviceId: req.body.serviceId }, (error, docs) => {
-        if (docs.length > 0) {
-            
-            console.log(docs);
-            res.send(docs);
-        }
-        else
-        {
-            res.send(docs);
-        }
-    });
-    
-});
+    const bookingServiceTypesData = require('../database/models/serviceTypes');   
 
-
-/*
-// get type of services provided by salon.
-router.get('/getExistingServices', (req, res) => {
-    const salonServices = require('../database/models/inBuiltSalonServices');
-    var services = [
-        {
-            gender: '1',
-            serviceName:'hairStyles'
-        },
-        {
-            gender: '2',
-            serviceName: 'tatoo'
-        },
-        {
-            gender: '2',
-            serviceName: 'makeup'
-        },
-        {
-            gender: '1',
-            serviceName: 'appointment'
-        },
-        {
-            gender: '1',
-            serviceName: 'ear pearcing'
-        },
-        {
-            gender: '1',
-            serviceName: 'nose pearcing'
-        },
-        {
-            gender: '1',
-            serviceName: 'stratening'
-        },
-        {
-            gender: '2',
-            serviceName: 'appointment'
-        },
-        {
-            gender: '2',
-            serviceName: 'hairStyles'
-        }
-    ];
-
-    // check services exist in db or not
-    salonServices.find({}, (error, docs)=>{
-        if (docs.length > 0) {
-            console.log('services already exist');
-            res.send(docs);
-        }
-        else
-        {
-            console.log('services not exist');
-            var j = 0;
-            var salonDataArr = [];
-            for (var i = 0; i < services.length; i++)
+    // when data comes from homepage.
+    if(req.body.gender != undefined)
+    {
+        const serviceCategories = require('../database/models/serviceCategories');
+        serviceCategories.findOne({_id:req.body.serviceId, gender:req.body.gender},(err, docs1)=>{
+            if(err)
             {
-                var saveSalonData = new salonServices(services[i]);
-                saveSalonData.save().then((salonData) => {
-                    if (salonData)
-                    {
-                        salonDataArr.push(salonData);
-                        if (j == services.length - 1)
-                        {
-                            res.send(salonDataArr);
-                        }
-                        j++;
-                    }
-                })
-
+                console.log('error in service categories');
+                return false;
             }
-           
-        }
-    });
-
-
-
+            console.log(docs1);
+            if(docs1 == null)
+            {
+                // res.send(docs);
+                console.log('heyhey');
+                res.send({result:0});
+                
+            }
+            else
+            {
+                bookingServiceTypesData.find({ serviceId: req.body.serviceId }, (error, docs) => {
+                    
+                    if (docs.length > 0) {                        
+                        console.log(docs);
+                        res.send({result:docs});
+                    }
+                    else
+                    {
+                        res.send({result:2});
+                    }
+                });                
+            }
+            
+        });
+    }
+    // when i click on service category in booking-service page.
+    else
+    {
+        bookingServiceTypesData.find({ serviceId: req.body.serviceId }, (error, docs) => {
+            if (docs.length > 0) {
+                
+                console.log(docs);
+                res.send({result:docs});
+            }
+            else
+            {
+                res.send({result:2});
+            }
+        });
+    }
 });
-
-*/
 
 
 
@@ -1156,22 +1115,20 @@ router.get('/servicesHomePage', (req, res) => {
         if(services.length > 0)
         {
             _.forEach(services,(singleService,serviceIndex)=>{
-                bookingServiceTypesData.find({serviceId:singleService._id},(serviceTypesErr,serviceTypes)=>{
-                    if(serviceTypes.length > 0)
+                bookingServiceTypesData.findOne({serviceId:singleService._id},(serviceTypeErr,serviceType)=>{
+                    if(serviceType)
                     {
-                        _.forEach(serviceTypes,(singleServiceType,serviceTypeIndex)=>{
-                            servicesListing.push({
-                                id:singleServiceType._id, 
-                                title:singleServiceType.serviceTypeName, 
-                                price:singleServiceType.price, 
-                                imageUrl:singleServiceType.image, 
+                        servicesListing.push({
+                                id:singleService._id, 
+                                title:singleService.services,                                 
+                                imageUrl:serviceType.image, 
+                                gender:singleService.gender,
                                 isMouseOver:false 
                             });
-                            if(serviceIndex == services.length-1 && serviceTypeIndex == serviceTypes.length-1)
-                            {
-                                res.send(servicesListing);
-                            }                            
-                        });
+                        if(serviceIndex == services.length-1)
+                        {
+                            res.send(servicesListing);
+                        }                                                    
                     }                    
                 });                
             });
