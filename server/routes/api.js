@@ -296,7 +296,7 @@ router.post('/getTypeOfServices', (req, res) => {
                 console.log('error in service categories');
                 return false;
             }
-            console.log(docs1);
+            // console.log(docs1);
             if(docs1 == null)
             {
                 // res.send(docs);
@@ -307,15 +307,22 @@ router.post('/getTypeOfServices', (req, res) => {
             else
             {
                 bookingServiceTypesData.find({ serviceId: req.body.serviceId }, (error, docs) => {
-                    
-                    if (docs.length > 0) {                        
-                        console.log(docs);
-                        res.send({result:docs});
+                    if(error)
+                    {                        
+                        res.send({result:0});                        
                     }
                     else
                     {
-                        res.send({result:2});
+                        if (docs.length > 0) {                        
+                            // console.log(docs);                        
+                            res.send({result:docs});
+                        }
+                        else
+                        {
+                            res.send({result:2});
+                        }
                     }
+
                 });                
             }
             
