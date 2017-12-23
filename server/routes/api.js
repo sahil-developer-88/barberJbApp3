@@ -1315,35 +1315,35 @@ router.post('/updateProfile',(req,res)=>{
 //     });
 // });
 
-router.get('/sendEmail',(req,res)=>{
+// router.get('/sendEmail',(req,res)=>{
     
-    console.log('demo send email');
-    var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'sahiljain.1111.11@gmail.com',
-        pass: 'vardhMan_Crandy'
-    }
-    });
+//     console.log('demo send email');
+//     var transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: 'sahiljain.1111.11@gmail.com',
+//         pass: 'vardhMan_Crandy'
+//     }
+//     });
 
-    var mailOptions = {
-    from: 'barberjb@gmail.com',
-    to: 'sahiljain12345@gmail.com',
-    subject: 'Sending Email using Node.js',
-    html: '<h3>Welcome to Barber jb salon</h3><p>hii</p>'
-    };
+//     var mailOptions = {
+//     from: 'barberjb@gmail.com',
+//     to: 'sahiljain12345@gmail.com',
+//     subject: 'Sending Email using Node.js',
+//     html: '<h3>Welcome to Barber jb salon</h3><p>hii</p>'
+//     };
 
-    transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-        // console.log(error);
-        throw error;
-        res.json(0);
-    } else {
-        console.log('Email sent: ' + info.response);
-        res.json(1);
-    }
-    });
-});
+//     transporter.sendMail(mailOptions, function(error, info){
+//     if (error) {
+//         // console.log(error);
+//         throw error;
+//         res.json(0);
+//     } else {
+//         console.log('Email sent: ' + info.response);
+//         res.json(1);
+//     }
+//     });
+// });
 
 
 module.exports = router;
