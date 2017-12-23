@@ -5,7 +5,7 @@ const router = express.Router();
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
-
+var nodemailer = require('nodemailer');
 
 
 
@@ -1314,6 +1314,33 @@ router.post('/updateProfile',(req,res)=>{
 //         res.json(data);
 //     });
 // });
+
+router.get('sendEmail',(req,res)=>{
+    
+    console.log('demo send email');
+    var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'sahiljain12345@gmail.com',
+        pass: 'barbersalon'
+    }
+    });
+
+    var mailOptions = {
+    from: 'barberjb@gmail.com',
+    to: 'sahiljain12345@gmail.com, sahiljain.1111.11@gmail.com',
+    subject: 'Sending Email using Node.js',
+    html: '<h3>Welcome to Barber jb salon</h3><p>hii</p>'
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+        console.log(error);
+    } else {
+        console.log('Email sent: ' + info.response);
+    }
+    });
+});
 
 
 module.exports = router;
