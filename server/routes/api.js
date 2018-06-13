@@ -7,7 +7,7 @@ const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
 var nodemailer = require('nodemailer');
 
-
+var mongoose = require('mongoose');
 
 
 
@@ -534,31 +534,15 @@ router.post('/payment', (req, res) => {
                 paymentData.save().then(function(savedPaymentData) {
                 req.session.thanks=true;
                 res.send({paymentTabId:savedPaymentData._id});
-                
-
-
-                // payment.find({},(err,docs)=>{
-                //     if(docs[docs.length - 1].bookingType == 2 && docs[docs.length - 1].stars != -1 && docs[docs.length - 1].review != '')
-                //     {
-                //         showFormStatus=1;
-                //     }
-                //     else if(docs[docs.length - 1].bookingType == 2 && docs[docs.length - 1].stars == -1 && docs[docs.length - 1].review == '')
-                //     {
-                //         showFormStatus=2;
-                //     }
-                //     else 
-                //     {
-                //         if(docs[docs.length - 1].bookingType != 2)
-                //         {
-                //             showFormStatus=0;
-                //         }
-                //     }
-                //     result={thanksValue: thanksValue, showFormStatus: showFormStatus };                
-                //     res.send(result);
-                // });
-
-
-                // res.json(paymentId);
+                });
+            }
+            else if(bookingType == 4)
+            {
+                price=parseInt(price)/100;
+                var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, appointmentId: req.body.appointmentId, companyName : req.body.companyName, description : req.body.description, bookingDate: req.body.bookingDate, timeSlot: req.body.timeSlot, successStatus:1, createdDate:todayDate, bookingType: bookingType });
+                paymentData.save().then(function(savedPaymentData) {
+                    req.session.thanks=true;
+                    res.status(200).send({paymentTabId:savedPaymentData._id});
                 });
             }
             else
@@ -587,10 +571,18 @@ router.post('/getLoginInfoAndBookingInfo',(req,res)=>{
     const userRegistrationSchema = require('../database/models/userRegistration');
     const bookingServiceTypesData = require('../database/models/serviceTypes');
     const bookingProducts = require('../database/models/bookingProducts');
+    const bookingAppointment = require('../database/models/appointmentBookingList');
     var loginSessionId=req.session.loginId;
-    
+    console.log('hiiii');
     var data=[];
+
+
     userRegistrationSchema.find({_id:loginSessionId},(error, userData)=>{
+        if(error)
+        {
+            res.status(500).send(error);
+            return false;
+        }
         // bookingType = 1 for service booking
         if(req.body.bookingType == 1)
         {
@@ -613,7 +605,7 @@ router.post('/getLoginInfoAndBookingInfo',(req,res)=>{
                 if(productError)
                 {
                     console.log(productError);
-                    res.send(data);
+                    res.send(productError); 
                     return false;
                 }
                 console.log('products');
@@ -621,6 +613,23 @@ router.post('/getLoginInfoAndBookingInfo',(req,res)=>{
                 data={userData:userData, serviceOrProductData:productData};
                 // console.log(serviceTypeData);
                 res.send(data);
+            });
+        }
+        else if(req.body.bookingType == 4)
+        {
+            bookingAppointment.aggregate([
+                {
+                    $match : {
+                        _id : mongoose.Types.ObjectId(req.body.appointmentId)
+                    }                    
+                }
+            ],(err, response) =>
+            {
+                console.log('response');
+                console.log(response);
+                data={userData:userData, serviceOrProductData:response};
+                res.status(200).send(data);
+                
             });
         }
         else
@@ -643,6 +652,7 @@ router.post('/getTimeSlotsForDate',(req,res)=>{
     const paymentSchema = require('../database/models/payment');
     const serviceSchema = require('../database/models/serviceTypes');
     paymentSchema.find({bookingDate:req.body.bookingDate, bookingType: 1},(err,docs)=>{
+    //paymentSchema.find({bookingDate:"16/01/2018", bookingType: 1},(err,docs)=>{
         console.log('api.js');
         var timeSlotsInfo=[];
         if(docs.length > 0)
@@ -656,20 +666,20 @@ router.post('/getTimeSlotsForDate',(req,res)=>{
                         timeSlotsInfo.push({timeSlot:paymentData.timeSlot, duration: servicesResult.timeSlotsDuration});
                         
                         if(index == docs.length-1)
-                        {                            
-                            res.send(timeSlotsInfo);
+                        {   
+                            res.status(200).send({status : true, data : timeSlotsInfo});
                         }
                     }
                     else
                     {
-                        res.json(timeSlotsInfo);                        
+                        res.status(200).send({status : false, data : timeSlotsInfo});
                     } 
                 });                 
             });
         }
         else
         {
-            res.json(timeSlotsInfo);
+            res.status(200).send({status : false, data : timeSlotsInfo});
         }        
     });
 });
@@ -1303,6 +1313,67 @@ router.post('/updateProfile',(req,res)=>{
 
             
             
+        }
+    });
+});
+
+// get timeslots on appointment booking page.
+// http://localhost:3000/booking-appointment
+router.post("/getAppointmentTimeSlotsApi",(req,res)=>{
+    const bookingDate=req.body.bookingDate;
+    const paymentData=require("../database/models/payment");
+    const serviceTypesData=require("../database/models/serviceTypes");
+    var timeSlots=[];
+    
+    paymentData.aggregate([
+        {            
+            $match : {bookingDate : bookingDate, bookingType : 4}
+        },
+        {
+            $lookup:{
+                from: 'appointment-booking-list',
+                localField: 'appointmentId',
+                foreignField: '_id',
+                as: 'appointmentData'
+            }
+        },
+        { $unwind:"$appointmentData"},
+        {
+            $project: {
+                _id:0,
+                timeSlot: "$timeSlot",
+                duration: "$appointmentData.duration"
+            }
+        }
+    ], (err, response) => {
+        console.log('response', response);
+        response.map((records) => {
+            console.log('hiiii');
+            timeSlots.push({timeSlot : records.timeSlot, duration : records.duration});
+        });
+        console.log('timeSlots');
+        console.log(timeSlots);
+        
+        
+        timeSlots.length > 0 ? res.status(200).json({status: true,data: response}) : res.status(200).json({status: false,data: response});
+
+        
+    });
+});
+
+
+router.get("/appointmentBookingListApi",(req,res)=>{
+    const appointmentBookingList = require('../database/models/appointmentBookingList');
+    var appointmentList=[];
+    appointmentBookingList.find({},(err,docs)=>{
+        if(docs.length > 0)
+        {
+            appointmentList=docs;
+            res.send(appointmentList);
+        }
+        else
+        {
+            res.send(appointmentList);
         }
     });
 });

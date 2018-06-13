@@ -1,19 +1,22 @@
-var mongoose = require('./connection');
-mongoose.Promise = require('bluebird');
+var mongoose = require('mongoose');
+// mongoose.Promise = require('bluebird');
 var Schema = mongoose.Schema;
 
 
 var paymentSchema = new Schema({
     paymentId: String,
-    userId: String,
-    bookingServiceId: String,   // services
+    userId: Schema.Types.ObjectId,
+    bookingServiceId: Schema.Types.ObjectId,   // services
     bookingProductId: String,    // products
+    appointmentId : Schema.Types.ObjectId,     // appointment
     timeSlot: String,   // services
     bookingDate: String,    // services
     bookingType: Number,    // services
     productQuantity: Number, // products
     serviceOrProductPrice: String, // without booking
     serviceOrProductName: String,  // without booking
+    companyName : String,   // appointment
+    description : String,   // appointment
     stars: Number,  // products
     review: String, // products
     successStatus: Number, 
