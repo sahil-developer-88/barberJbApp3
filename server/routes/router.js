@@ -51,6 +51,34 @@ var exportedRoutes = function(app) {
     
     var singleProductController = require('./../controllers/frontend/single-product-controller');
     routes.route('/api/frontend/getSingleProductInfo').post(singleProductController.getSingleProductInfo);
+
+
+
+
+    // ******** BACKEND CONTROLLERS *************
+
+    var paymentController = require('./../controllers/backend/payment-controller');
+    routes.route('/api/backend/paymentStatus').post(paymentController.paymentStatus);
+    routes.route('/api/backend/paymentCollectionLength').get(paymentController.paymentCollectionLength);
+    routes.route('/api/backend/serviceBookingPaymentDetails').post(paymentController.serviceBookingPaymentDetails);
+    routes.route('/api/backend/appointmentBookingPaymentDetails').post(paymentController.appointmentBookingPaymentDetails);
+    routes.route('/api/backend/offlineBookingPaymentDetails').post(paymentController.offlineBookingPaymentDetails);
+    routes.route('/api/backend/demoDetails').get(paymentController.demoDetails);
+    routes.route('/api/backend/updateDetails').get(paymentController.updateDetails);    // demo function
+
+    var categoryController = require('./../controllers/backend/category-controller');
+    routes.route('/api/backend/categoryList').post(categoryController.categoryList);
+    routes.route('/api/backend/categoryRecordsLength').get(categoryController.categoryRecordsLength);
+    routes.route('/api/backend/updateCategory').post(categoryController.updateCategory);
+    routes.route('/api/backend/addCategory').post(categoryController.addCategory);
+
+    var serviceController = require('./../controllers/backend/service-controller');
+    routes.route('/api/backend/serviceList').post(serviceController.serviceList);
+    routes.route('/api/backend/serviceRecordsLength').get(serviceController.serviceRecordsLength);
+    
+
+    
+    
     return routes;
 }
 module.exports = exportedRoutes;

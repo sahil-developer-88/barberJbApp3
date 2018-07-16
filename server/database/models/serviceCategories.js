@@ -9,8 +9,9 @@ var Schema = mongoose.Schema;
     services: String    
 }, {_id: false, collection: 'categories-data'}); */
 var categoriesSchema = new Schema({
-    gender: String,
-    services: String    
+    gender: Number,
+    services: String,
+    createdDate : Number
 }, { collection: 'categories-data'});
 
 var categoriesData = mongoose.model('categoriesData', categoriesSchema);

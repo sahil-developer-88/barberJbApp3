@@ -85,6 +85,7 @@ var frontController = {
         console.log('data under payment is coming');
         const userDetailsSchema = require('../../database/models/userRegistration');
         const paymentSchema = require('../../database/models/payment');
+        const moment = require('moment');
         var Razorpay=require('razorpay');
         var paymentId=req.body.paymentId;
         var phoneNumber=req.body.phoneNumber;
@@ -97,6 +98,7 @@ var frontController = {
             key_secret: 'jzbSVLzCEIS8pU5fKM8htDco'
         });
         var price;
+        var paymentType = 0;  // This variable will be used when offline payment is done.
         if(bookingType == 3)
         {
             price=parseInt(req.body.price)*100;
@@ -106,7 +108,13 @@ var frontController = {
             price=req.body.price;
         }
         
-        instance.payments.capture(paymentId, price);
+        if(paymentId) {
+            instance.payments.capture(paymentId, price);
+        }
+        else {
+            paymentType = 1;
+            paymentId = null;
+        }
         
         // update profile details
          var conditions = { _id: loginSessionId }
@@ -119,7 +127,9 @@ var frontController = {
           {
               
               var date=new Date();
-              var todayDate=date.getDate()+'/'+(parseInt(date.getMonth())+1)+'/'+date.getFullYear();
+              // var todayDate=date.getDate()+'/'+(parseInt(date.getMonth())+1)+'/'+date.getFullYear();
+              // var todayDateFormat = moment().format();
+              var todayDate = moment().unix();
               if(bookingType == 1)
               {
                   
@@ -152,7 +162,8 @@ var frontController = {
                     if(bookingType == 3)
                     {
                         price=parseInt(price)/100;
-                        var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, serviceOrProductPrice: req.body.price, serviceOrProductName:req.body.serviceOrProductName, successStatus:1, createdDate:todayDate, bookingType: bookingType });
+                        
+                        var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, serviceOrProductPrice: req.body.price, serviceOrProductName:req.body.serviceOrProductName, successStatus:1, createdDate:todayDate, bookingType: bookingType, paymentType : paymentType });
                         paymentData.save().then(function(savedPaymentData) {
                             req.session.thanks=true;
                             // res.json(paymentId);

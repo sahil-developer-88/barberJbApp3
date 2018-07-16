@@ -4,11 +4,12 @@ var Schema = mongoose.Schema;
 
 
 var serviceTypesSchema = new Schema({
-    serviceId: String,
+    serviceId: Schema.Types.ObjectId,
     serviceTypeName: String,
     image: String,
     price: String,
-    timeSlotsDuration: Number
+    timeSlotsDuration: Number,
+    createdDate : Number
 }, { collection: 'service-types-data' });
 
 var serviceTypesData = mongoose.model('serviceTypesData', serviceTypesSchema);

@@ -20,7 +20,11 @@ var paymentSchema = new Schema({
     stars: Number,  // products
     review: String, // products
     successStatus: Number, 
-    createdDate: String 
+    paymentType : {
+        type : Number,
+        enum : [0,1]        // 0 for online banking and 1 for cash payment
+    },
+    createdDate: Number 
 }, { collection: 'payment-data'});
 
 var paymentData = mongoose.model('paymentData', paymentSchema);
