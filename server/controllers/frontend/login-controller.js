@@ -32,7 +32,7 @@ module.exports = function(express) {
             var name = req.user.firstName;
             if(req.user.lastName)
             {
-                var name = req.user.firstName + req.user.lastName;
+                var name = `${req.user.firstName} ${req.user.lastName}`;
             }
             return res.status(200).send({status:1,name:name});
         }

@@ -5,24 +5,11 @@ var bookingController = {
         const bookingServiceCategoriesData = require('../../database/models/serviceCategories');
         const bookingServiceTypesData = require('../../database/models/serviceTypes');
         const payment = require('../../database/models/payment');
-        
-    
-    
-         // const userLoginSchema = require('../database/models/userRegistration');
-    
         var paymentDataServices=[];
         
         var paymentDataWithoutBooking=[];
         var details;
         var paymentData;
-        // req.session.loginId="594a7053f510150c746d3a0d";
-                    // services Records
-    
-                    // so, user can not redirect to thanks page.
-                    // if(req.session.thanks && req.session.thanks == true )
-                    // {
-                    //     req.session.thanks=false;
-                    // }
                     if(req.isAuthenticated())
                     {
                         payment.find({userId:req.user._id,bookingType:1},(paymentDataErr,servicesRecords)=>{
@@ -40,7 +27,7 @@ var bookingController = {
                                                 
                                                 if(index == servicesRecords.length-1)
                                                 {
-                                                    details={paymentDataServices};
+                                                    details={paymentDataServices, length :servicesRecords.length};
                                                     res.json(details);
                                                 }
                                             });
@@ -49,7 +36,7 @@ var bookingController = {
                             }
                             else
                             {
-                                details={paymentDataServices};
+                                details={paymentDataServices, length :servicesRecords.length};
                                 res.json(details);
                             }
         
@@ -57,7 +44,7 @@ var bookingController = {
                     }
                     else
                     {
-                        details={paymentDataServices};
+                        details={paymentDataServices, length : 0};
                         res.json(details);
                     }
     },
@@ -100,10 +87,13 @@ var bookingController = {
                 response.map((records) => {
                     appointmentBookings.push(records);
                 });
-                res.status(200).send(appointmentBookings);
+                res.status(200).send({appointmentBookings, length : response.length});
             });
         }
-        
+        else 
+        {
+            res.status(200).send({appointmentBookings, length : 0});
+        }
 
     },
     getBookedProductsData : function(req, res)  {
@@ -172,7 +162,7 @@ var bookingController = {
                     paymentDataWithoutBooking.push({name:singleNoBookingRecord.serviceOrProductName, price:singleNoBookingRecord.serviceOrProductPrice, transactionDate:singleNoBookingRecord.createdDate}); 
                         if(index == noBookingRecords.length-1)
                         {
-                            details={paymentDataWithoutBooking};
+                            details={paymentDataWithoutBooking, length : noBookingRecords.length};
                             res.json(details);
                         }                       
                     });
@@ -180,11 +170,16 @@ var bookingController = {
                 }
                 else
                 {
-                    details={paymentDataWithoutBooking};
+                    details={paymentDataWithoutBooking, length : noBookingRecords.length};
                     res.json(details);
                 }
             });
         }
+        else {
+            details={paymentDataWithoutBooking, length : 0};
+            res.json(details);
+        }
+
 
 
         
