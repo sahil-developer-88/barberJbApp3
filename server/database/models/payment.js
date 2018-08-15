@@ -13,16 +13,20 @@ var paymentSchema = new Schema({
     bookingDate: String,    // services
     bookingType: Number,    // services
     productQuantity: Number, // products
-    serviceOrProductPrice: String, // without booking
+    serviceOrProductPrice: Number, // without booking
     serviceOrProductName: String,  // without booking
     companyName : String,   // appointment
     description : String,   // appointment
     stars: Number,  // products
     review: String, // products
     successStatus: Number, 
+    promoCodeId : Schema.Types.ObjectId,   // promo code id for discount
     paymentType : {
         type : Number,
         enum : [0,1]        // 0 for online banking and 1 for cash payment
+    },
+    finalAmount : {
+        type : Number
     },
     createdDate: Number 
 }, { collection: 'payment-data'});

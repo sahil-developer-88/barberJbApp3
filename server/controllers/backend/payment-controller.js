@@ -1,3 +1,5 @@
+const paymentModel = require('../../database/models/payment');
+const mongoose = require('mongoose');
 var paymentController = {
     paymentStatus: function(req, res) {
         
@@ -268,6 +270,9 @@ var paymentController = {
                 });
             }
         });
+    },
+    addService : (req, res) => {
+        
     }
 };
 module.exports = paymentController;

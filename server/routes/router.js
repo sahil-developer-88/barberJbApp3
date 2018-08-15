@@ -65,6 +65,7 @@ var exportedRoutes = function(app) {
     routes.route('/api/backend/offlineBookingPaymentDetails').post(paymentController.offlineBookingPaymentDetails);
     routes.route('/api/backend/demoDetails').get(paymentController.demoDetails);
     routes.route('/api/backend/updateDetails').get(paymentController.updateDetails);    // demo function
+    
 
     var categoryController = require('./../controllers/backend/category-controller');
     routes.route('/api/backend/categoryList').post(categoryController.categoryList);
@@ -72,11 +73,20 @@ var exportedRoutes = function(app) {
     routes.route('/api/backend/updateCategory').post(categoryController.updateCategory);
     routes.route('/api/backend/addCategory').post(categoryController.addCategory);
 
-    var serviceController = require('./../controllers/backend/service-controller');
-    routes.route('/api/backend/serviceList').post(serviceController.serviceList);
-    routes.route('/api/backend/serviceRecordsLength').get(serviceController.serviceRecordsLength);
-    
+    var serviceController = require('./../controllers/backend/service-controller')(express);
+    routes.use('/api/backend',serviceController);
+    // routes.route('/api/backend/serviceList').post(serviceController.serviceList);
+    // routes.route('/api/backend/serviceRecordsLength').get(serviceController.serviceRecordsLength);
+    // routes.route('/api/backend/categoriesList').get(serviceController.categoriesList);
+    // routes.route('/api/backend/addService').post(serviceController.addService);
 
+    var promoCodeController = require('./../controllers/backend/promo-code-controller');
+    routes.route('/api/backend/usersList').get(promoCodeController.usersList);
+    routes.route('/api/backend/savePromoCodeDetails').post(promoCodeController.savePromoCodeDetails);
+    routes.route('/api/backend/checkExistingUsers').post(promoCodeController.checkExistingUsers);
+    routes.route('/api/backend/promoCodeList').post(promoCodeController.promoCodeList);
+    routes.route('/api/backend/promoCodeListLength').get(promoCodeController.promoCodeListLength);
+    routes.route('/api/backend/promoCodeCheck').post(promoCodeController.promoCodeCheck);
     
     
     return routes;

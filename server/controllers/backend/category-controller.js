@@ -98,7 +98,7 @@ var categoryController = {
         const todayDate = moment().unix();
         const startIndex = 0;
         
-        if(req.body) 
+        if(!req.body) 
             return res.status(errors.MissingRequiredData.code).send(errors.MissingRequiredData);
 
         if(!req.body.gender || !req.body.services || !req.body.pageSize)
@@ -112,17 +112,23 @@ var categoryController = {
         categoryModel.aggregate([
             {
                 $match : {
-                    "gender" : parseInt(gender),
-                    "services" : category
+                    gender : parseInt(gender),
+                    services : category
                 }
             }
         ],(err, response) => {
-            if(err)
-                return err;
+            if(err) {
+                console.log('server error');
+                return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
+            }
+                
+            console.log('response.length');
+            console.log(response.length);
             if(response.length > 0) {
-                res.status(200).send({status : 1, message : 'Category already exists.', data : []});
+                return res.status(200).send({status : 1, message : 'Category already exists.', data : []});
             }
             else {
+                console.log('still here');
                 // create category
                 const query = new categoryModel({gender : gender, services : category, createdDate : todayDate});
                 query.save().then((categoryRecord) => {
@@ -138,19 +144,21 @@ var categoryController = {
                             {
                                 $limit : startIndex + parseInt(pageSize)
                             }
-                        ],(err, list) => {
-                            if(err) {
+                        ],(err1, list) => {
+                            if(err1) {
                                 console.log('error in api');
                                 return res.status(500).send({name: 'INTERNAL_SERVER_ERROR',
                                 title: 'Internal Server Error',
                                 msg: 'Internal Server Error occured.'});
                             }
-                            res.status(200).send({status : 1, message : 'Category created successfully.', data : list });
+                            if(list) {
+                                return res.status(200).send({status : 1, message : 'Category created successfully.', data : list });
+                            }
                         });
 
                     }
                     else {
-                        res.status(200).send({status : 0, message : 'Category creation failure error', data : []});
+                        return res.status(200).send({status : 0, message : 'Category creation failure error', data : []});
                     }
                 });
             }

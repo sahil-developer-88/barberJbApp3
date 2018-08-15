@@ -1,4 +1,6 @@
 const _=require('lodash');
+const promoCodeModel = require('../../database/models/promoCodes');
+var errors = require('../../shared/msg');
 var frontController = {
     serviceCategorySelection: function(req, res) {
         const bookingServiceCategoriesData = require('../../database/models/serviceCategories');

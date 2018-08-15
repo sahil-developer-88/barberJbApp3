@@ -92,6 +92,7 @@ var frontController = {
         var state=req.body.state;
         var city=req.body.city;
         var bookingType=req.body.bookingType;
+        var promoCodeId = req.body.promoCodeId;
         var loginSessionId=req.user._id;
         var instance = new Razorpay({
             key_id: 'rzp_test_xTVYVlOmAgyUyO',
@@ -132,9 +133,11 @@ var frontController = {
               var todayDate = moment().unix();
               if(bookingType == 1)
               {
-                  
-                var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, bookingServiceId: req.body.serviceId, bookingDate: req.body.bookingDate, timeSlot: req.body.timeSlot, successStatus:1, createdDate:todayDate, bookingType: bookingType });
+                console.log('promoCodeId');
+                console.log(promoCodeId);
+                var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, bookingServiceId: req.body.serviceId, bookingDate: req.body.bookingDate, timeSlot: req.body.timeSlot, successStatus:1, createdDate:todayDate, bookingType: bookingType, promoCodeId : promoCodeId });
                 paymentData.save().then(function(savedPaymentData) {
+                    console.log('saved successfully');
                     req.session.thanks=true;
                     // res.json(paymentId);
                     res.send({paymentTabId:''});
@@ -142,7 +145,7 @@ var frontController = {
               }
                 else if(bookingType == 2)
                 {
-                    var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, bookingProductId: req.body.productId, successStatus:1, createdDate:todayDate, bookingType: bookingType, productQuantity: req.body.quantity, stars: -1, review: '' });
+                    var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, bookingProductId: req.body.productId, successStatus:1, createdDate:todayDate, bookingType: bookingType, productQuantity: req.body.quantity, stars: -1, review: '', promoCodeId : promoCodeId });
                     paymentData.save().then(function(savedPaymentData) {
                     req.session.thanks=true;
                     res.send({paymentTabId:savedPaymentData._id});
@@ -151,7 +154,7 @@ var frontController = {
                 else if(bookingType == 4)
                 {
                     price=parseInt(price)/100;
-                    var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, appointmentId: req.body.appointmentId, companyName : req.body.companyName, description : req.body.description, bookingDate: req.body.bookingDate, timeSlot: req.body.timeSlot, successStatus:1, createdDate:todayDate, bookingType: bookingType });
+                    var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, appointmentId: req.body.appointmentId, companyName : req.body.companyName, description : req.body.description, bookingDate: req.body.bookingDate, timeSlot: req.body.timeSlot, successStatus:1, createdDate:todayDate, bookingType: bookingType, promoCodeId : promoCodeId });
                     paymentData.save().then(function(savedPaymentData) {
                         req.session.thanks=true;
                         res.status(200).send({paymentTabId:savedPaymentData._id});
@@ -163,7 +166,7 @@ var frontController = {
                     {
                         price=parseInt(price)/100;
                         
-                        var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, serviceOrProductPrice: req.body.price, serviceOrProductName:req.body.serviceOrProductName, successStatus:1, createdDate:todayDate, bookingType: bookingType, paymentType : paymentType });
+                        var paymentData=new paymentSchema({paymentId: paymentId, userId: loginSessionId, serviceOrProductPrice: req.body.price.toFixed(2), serviceOrProductName:req.body.serviceOrProductName, successStatus:1, createdDate:todayDate, bookingType: bookingType, paymentType : paymentType, promoCodeId : promoCodeId });
                         paymentData.save().then(function(savedPaymentData) {
                             req.session.thanks=true;
                             // res.json(paymentId);

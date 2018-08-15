@@ -7,7 +7,7 @@ var serviceTypesSchema = new Schema({
     serviceId: Schema.Types.ObjectId,
     serviceTypeName: String,
     image: String,
-    price: String,
+    price: Number,
     timeSlotsDuration: Number,
     createdDate : Number
 }, { collection: 'service-types-data' });
