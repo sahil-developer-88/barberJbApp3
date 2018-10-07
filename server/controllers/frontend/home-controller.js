@@ -7,21 +7,10 @@ var frontController = {
 
         bookingServiceCategoriesData.aggregate([
             {
-                $lookup : {
-                    from : 'service-types-data',
-                    foreignField : 'serviceId',
-                    localField : '_id',
-                    as : 'servicesData'
-                }
-            },
-            {
-                $unwind : '$servicesData'
-            },
-            {
                 $project : {
-                    id : 1,
+                    _id : 1,
                     title : '$services',
-                    imageUrl : '$servicesData.image',
+                    // imageUrl : '$servicesData.image',
                     gender : '$gender'
                 }
             }
@@ -31,13 +20,31 @@ var frontController = {
             }
             
             if(response.length > 0) {
-                var newData= response.map(data => {
-                    data.isMouseOver = false;
-                    return data;
+                // console.log(response);
+                var newData = [];
+                response.forEach((data, index) => {
+                    bookingServiceTypesData.find({serviceId : data._id},(err,docs)=> {
+                        if(err)
+                            return;
+                        
+                        // console.log(`${data._id} ${docs[0].serviceId}`);
+                        if((data._id).toString() == (docs[0].serviceId).toString()) {
+                            data.imageUrl =  docs[0].image;
+                            
+                            if(index == response.length-1) {
+                                newData.push(data);
+                                servicesListing = newData;
+                                res.send(servicesListing);
+                            }
+                            else {
+                                newData.push(data);
+                            }
+                        }
+                        
+                    });
                 });
-                console.log('correct');
-                servicesListing = newData;
-                res.send(servicesListing);
+
+                
             }
             else {
                 res.send(servicesListing);

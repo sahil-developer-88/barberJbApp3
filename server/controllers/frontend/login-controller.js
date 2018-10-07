@@ -1,6 +1,6 @@
 module.exports = function(express) {
     let router = express.Router();
-    var bcrypt = require('bcrypt');
+    var bcrypt = require('bcrypt-nodejs');
     const saltRounds = 10;
     const myPlaintextPassword = 's0/\/\P4$$w0rD';
     const passport=require('passport');

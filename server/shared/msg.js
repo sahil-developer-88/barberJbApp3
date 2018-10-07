@@ -20,6 +20,13 @@ ERRORS = {
     name: 'INTERNAL_SERVER_ERROR',
     title: 'User Not Exist',
     msg: 'User does not exist.'
-  }    
+  },
+  InternalServerErrorQuery: {
+    code: 500,
+    name: 'INTERNAL_SERVER_ERROR',
+    title: 'Query Error',
+    msg: 'Query Failure Error.'
+  }
+
 }
 module.exports = ERRORS;

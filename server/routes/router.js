@@ -65,6 +65,7 @@ var exportedRoutes = function(app) {
     routes.route('/api/backend/offlineBookingPaymentDetails').post(paymentController.offlineBookingPaymentDetails);
     routes.route('/api/backend/demoDetails').get(paymentController.demoDetails);
     routes.route('/api/backend/updateDetails').get(paymentController.updateDetails);    // demo function
+    routes.route('/api/backend/paymentDemo').get(paymentController.paymentDemo);
     
 
     var categoryController = require('./../controllers/backend/category-controller');
@@ -87,6 +88,8 @@ var exportedRoutes = function(app) {
     routes.route('/api/backend/promoCodeList').post(promoCodeController.promoCodeList);
     routes.route('/api/backend/promoCodeListLength').get(promoCodeController.promoCodeListLength);
     routes.route('/api/backend/promoCodeCheck').post(promoCodeController.promoCodeCheck);
+    routes.route('/api/backend/statusUpdate').get(promoCodeController.statusUpdate);
+    routes.route('/api/backend/promoCodeUsersDetails').post(promoCodeController.promoCodeUsersDetails);
     
     
     return routes;

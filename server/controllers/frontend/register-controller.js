@@ -17,18 +17,18 @@ var frontController = {
                 res.send(result);
             }
             else {
-                var bcrypt = require('bcrypt');
+                var bcrypt = require('bcrypt-nodejs');
                 const saltRounds = 10;
                 const myPlaintextPassword = req.body.password;
-    
-                bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
+                
+                bcrypt.hash(myPlaintextPassword, null, null, function (err, hash) {
                     // Store hash in your password DB. 
                     // console.log(hash);
                     // saved.    
                     var userDetails = { firstName: req.body.firstName, lastName: req.body.lastName, password: hash, email: req.body.email };
                     var userRegister = new userRegistrationSchema(userDetails);
     
-                    if (userRegister.save().then(function (userSave) {                    
+                    if (userRegister.save().then(function (userSave) {    
                         if (userSave) {
                             userCreationStatus = 1;
                         }

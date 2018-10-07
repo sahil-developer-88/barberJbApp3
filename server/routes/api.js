@@ -2,7 +2,7 @@
 const _=require('lodash');
 const router = express.Router();
 
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt-nodejs');
 const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
 var nodemailer = require('nodemailer');
@@ -366,7 +366,7 @@ router.post('/saveUserInfo', (req, res) => {
             res.send(result);
         }
         else {
-            var bcrypt = require('bcrypt');
+            var bcrypt = require('bcrypt-nodejs');
             const saltRounds = 10;
             const myPlaintextPassword = req.body.password;
 
@@ -1286,7 +1286,7 @@ router.post('/updateProfile',(req,res)=>{
             }
             else
             {                
-                var bcrypt = require('bcrypt');
+                var bcrypt = require('bcrypt-nodejs');
                 const saltRounds = 10;
                 const myPlaintextPassword = req.body.newPassword;                
                 bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {                

@@ -1,5 +1,6 @@
 const paymentModel = require('../../database/models/payment');
 const mongoose = require('mongoose');
+const promoCodeModel = require('../../database/models/promoCodes');
 var paymentController = {
     paymentStatus: function(req, res) {
         
@@ -109,9 +110,12 @@ var paymentController = {
                 $project : {
                     _id : 0,
                     userDetails : { 'firstName' : '$userDetails.firstName', 'lastName' : '$userDetails.lastName', 'email' : '$userDetails.email', 'city' : '$userDetails.city', 'state' : '$userDetails.state', 'phoneNumber' : '$userDetails.phoneNumber' },
-                    paymentDetails : {bookingType : '$bookingType', bookingDate : '$bookingDate', successStatus : '$successStatus', createdDate : '$createdDate', timeSlot : '$timeSlot', 'successStatus' : '$successStatus'},
-                    serviceBookingDetails : { serviceTypeName : '$serviceBookingDetails.serviceTypeName', image : '$serviceBookingDetails.serviceTypeName', image : '$serviceBookingDetails.image', price : '$serviceBookingDetails.price', timeSlotsDuration : '$serviceBookingDetails.timeSlotsDuration' }
-                    
+                    paymentDetails : {bookingType : '$bookingType', bookingDate : '$bookingDate', successStatus : '$successStatus', createdDate : '$createdDate', timeSlot : '$timeSlot', 'successStatus' : '$successStatus', 'promoCode' :{
+                        $cond : {
+                            if : '$promoCodeId', then : '$promoCodeId', else : null
+                        }
+                    }},
+                    serviceBookingDetails : { serviceTypeName : '$serviceBookingDetails.serviceTypeName', image : '$serviceBookingDetails.image', price : '$serviceBookingDetails.price', timeSlotsDuration : '$serviceBookingDetails.timeSlotsDuration' }
                 }
             }
         ],(err, response) => {
@@ -119,9 +123,34 @@ var paymentController = {
                 return err;
 
             console.log('here');
-            console.log(response[0].serviceId);
-            var paymentDetails = response[0];
-            res.status(200).send(paymentDetails);
+            console.log(response[0]);
+            // if promo code id is not null, then we need to find promo code corresponds to its id.
+            if(response[0].paymentDetails.promoCode != null) {
+                var promoCodeId = response[0].paymentDetails.promoCode;
+                promoCodeModel.aggregate([
+                    {
+                        $match : {
+                            _id : mongoose.Types.ObjectId(promoCodeId)
+                        }
+                    }
+                ],(promoCodeErr, promoCodeRecord)=> {
+                    if(promoCodeErr) {
+                        console.log('promo code error');
+                        return false;
+                    }
+
+                    if(promoCodeRecord.length > 0) {
+                        response[0].paymentDetails.promoCode = promoCodeRecord[0].promoCode;
+                        res.status(200).send(response[0]);            
+                    }
+                    else {
+                        res.status(200).send(response[0]);
+                    }   
+                });
+            }
+            else {
+                res.status(200).send(response[0]);
+            }
         });
     },
     appointmentBookingPaymentDetails : (req, res) => {
@@ -271,8 +300,14 @@ var paymentController = {
             }
         });
     },
-    addService : (req, res) => {
+    paymentDemo : (req, res) => {
         
+        console.log('hiiiiiiii paymentDemo');
+        console.log(req.headers);
+            
+          
+        // console.log(res.headers);
+        res.json('yes');
     }
 };
 module.exports = paymentController;

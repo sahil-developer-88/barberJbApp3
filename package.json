@@ -4,7 +4,7 @@
   "main": "server.js",
   "license": "MIT",
   "engines": {
-    "node": "6.11.0"
+    "node": "8.11.4"
   },
   "scripts": {
     "ng": "ng",
@@ -19,7 +19,7 @@
     "@agm/core": "^1.0.0-beta.2",
     "@angular/animations": "5.2.10",
     "@angular/cdk": "5.2.5",
-    "@angular/common": "5.2.10",
+    "@angular/common": "5.2.10", 
     "@angular/compiler": "5.2.10",
     "@angular/core": "5.2.10",
     "@angular/forms": "5.2.10",
@@ -31,7 +31,7 @@
     "angular-2-local-storage": "^1.0.1",
     "angular-star-rating": "^3.0.3",
     "angular2-fontawesome": "^0.9.3",
-    "bcrypt": "2.0.1",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.17.2",
     "bootstrap": "^3.3.7",
     "connect-mongo": "^2.0.1",

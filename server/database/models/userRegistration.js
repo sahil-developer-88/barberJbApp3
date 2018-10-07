@@ -1,7 +1,7 @@
 ﻿var mongoose = require('mongoose');
 // mongoose.Promise = require('bluebird');
 var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt-nodejs');
 const saltRounds = 10;
 
 

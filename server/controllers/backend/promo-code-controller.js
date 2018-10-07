@@ -9,26 +9,18 @@ const moment = require('moment');
 const mongoose = require('mongoose');
 var request = require("request");
 var promoCodeController = {
+    // admin page
     promoCodeList : (req, res) => {
         if(!req.body)
         {
             console.log('body');
             return res.status(errors.MissingRequiredData.code).send(errors.MissingRequiredData);
         }
-            
-
-        // if(!req.body.startIndex || !req.body.pageSize)
-        // {
-        //     console.log('params');
-        //     console.log(req.body.startIndex);
-        //     console.log(req.body.pageSize);
-        //     return res.status(errors.MissingRequiredData.code).send(errors.MissingRequiredData);
-        // }
-
+        
         
         startIndex = parseInt(req.body.startIndex);
         pageSize =  parseInt(req.body.pageSize);
-        promoCodeUserRelationModel.aggregate([
+        promoCodeModel.aggregate([
             {
                 $sort : {
                     "createdDate" : -1
@@ -39,42 +31,7 @@ var promoCodeController = {
             },
             {
                 $skip : startIndex
-            },
-            {
-                $lookup : {
-                    from : 'promo-codes',
-                    localField : 'promoCodeId',
-                    foreignField : '_id',
-                    as : 'promoCodeData'
-                }
-            },
-            {
-                $unwind : '$promoCodeData'
-            },
-            {
-                $lookup : {
-                    from : 'users',
-                    localField : 'userId',
-                    foreignField : '_id',
-                    as : 'usersData'
-                }
-            },
-            {
-                $unwind : '$usersData'
-            },
-            {
-                $project : {
-                    name: {firstName : '$usersData.firstName', lastName : '$usersData.lastName'} ,
-                    email : '$usersData.email',
-                    promoCode : '$promoCodeData.promoCode',
-                    discount : '$promoCodeData.discount',
-                    status : '$status',
-                    startingDate: '$promoCodeData.startingDate',
-                    endingDate : '$promoCodeData.endingDate'
-                    // createdDate : '$createdDate'
-                }
             }
-
         ],
         (err, response) => {
             if(err) {
@@ -83,7 +40,6 @@ var promoCodeController = {
             }
 
             if(response.length > 0) {
-                console.log(response);
                 return res.status(200).send(response);
             }
             else {
@@ -91,9 +47,58 @@ var promoCodeController = {
                     return res.status(200).send([]);
                 }                
             }
-
         });
     },
+    // admin page
+    promoCodeUsersDetails : (req, res) => {
+        
+        console.log(req.body._id);
+        promoCodeModel.aggregate([
+                {
+                    $match : {
+                        _id : mongoose.Types.ObjectId(req.body._id)
+                    }
+                },
+                {
+                    $lookup : {
+                        from : 'promo-codes-users-relation',
+                        localField : '_id',
+                        foreignField : 'promoCodeId',
+                        as : 'promoCodeRelationData'
+                    }
+                },
+                {
+                    $unwind : '$promoCodeRelationData'
+                },
+                {
+                    $lookup : {
+                        from : 'users',
+                        localField : 'promoCodeRelationData.userId',
+                        foreignField : '_id',
+                        as : 'usersData'
+                    }
+                },
+                {
+                    $unwind : '$usersData'
+                },
+                {
+                    $project : {
+                        _id : 0,
+                        name: {firstName : '$usersData.firstName', lastName : '$usersData.lastName'},
+                        email : '$usersData.email',
+                        status : '$promoCodeRelationData.status',
+                        createdDate: '$promoCodeRelationData.createdDate'
+                    }
+                }
+            ],
+            (err, response) => {
+                if(err)
+                    return res.status(errors.InternalServerErrorQuery.code).send(errors.InternalServerErrorQuery);
+                return res.status(200).send(response);
+        });
+        
+    },
+    // admin page
     usersList : (req, res) => {
         userModel.aggregate([
             {
@@ -125,7 +130,7 @@ var promoCodeController = {
             }
         });
     },
-
+    // admin page
     checkExistingUsers : (req,res)=> {
         if(!req.body)
         return res.status(errors.MissingRequiredData.code).send(errors.MissingRequiredData);
@@ -136,7 +141,9 @@ var promoCodeController = {
         const promoCode = req.body.promoCode;
         const discount = req.body.discount;
         var startingDate = moment(req.body.startingDate).unix();
-        var endingDate = moment(req.body.endingDate).unix();
+        var endingDateUnix = moment(req.body.endingDate).unix();
+        var splitEndingDate = moment.unix(endingDateUnix).format('YYYY-MM-DD HH:mm:ss').split(" ");
+        var endingDate = moment(splitEndingDate[0]+" 23:59:59", 'YYYY-MM-DD HH:mm:ss').unix();
         var selectedUsers = req.body.selectedUsers;
         const createdDate = moment().unix();
         var finalResult =[];
@@ -248,6 +255,7 @@ var promoCodeController = {
         });
 
     },
+    // admin page
     savePromoCodeDetails : (req, res) => {
         if(!req.body)
         return res.status(errors.MissingRequiredData.code).send(errors.MissingRequiredData);
@@ -258,7 +266,9 @@ var promoCodeController = {
         const promoCode = req.body.promoCode;
         const discount = req.body.discount;
         var startingDate = moment(req.body.startingDate).unix();
-        var endingDate = moment(req.body.endingDate).unix();
+        var endingDateUnix = moment(req.body.endingDate).unix();
+        var splitEndingDate = moment.unix(endingDateUnix).format('YYYY-MM-DD HH:mm:ss').split(" ");
+        var endingDate = moment(splitEndingDate[0]+" 23:59:59", 'YYYY-MM-DD HH:mm:ss').unix();
         var selectedUsers = req.body.selectedUsers;
         const createdDate = moment().unix();
         const startIndex = 0;
@@ -310,7 +320,7 @@ var promoCodeController = {
                     }
 
 
-                    var insertPromoCodeQuery = new promoCodeModel({promoCode, discount, startingDate, endingDate, createdDate: moment().unix(), modifiedDate : moment().unix()});
+                    var insertPromoCodeQuery = new promoCodeModel({promoCode, discount, startingDate, endingDate, status : 1, createdDate: moment().unix(), modifiedDate : moment().unix()});
                     insertPromoCodeQuery.save().then((record) => {
                         if(record) {
                             // insert and update promoCodeUserRelations collection with new promo code.
@@ -373,14 +383,12 @@ var promoCodeController = {
                                             },
                                             {
                                                 $project : {
-                                                    name: {firstName : '$usersData.firstName', lastName : '$usersData.lastName'} ,
-                                                    email : '$usersData.email',
+                                                    _id : '$promoCodeData._id',
                                                     promoCode : '$promoCodeData.promoCode',
                                                     discount : '$promoCodeData.discount',
-                                                    status : '$status',
+                                                    status : '$promoCodeData.status',
                                                     startingDate: '$promoCodeData.startingDate',
                                                     endingDate : '$promoCodeData.endingDate'
-                                                    // createdDate : '$createdDate'
                                                 }
                                             }
                                 
@@ -403,7 +411,6 @@ var promoCodeController = {
                             });
 
                             
-                            // res.status(200).send({status : 1, data: record, message : 'Promo code successfully created.'});
                         }
                         else {
                             return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
@@ -447,13 +454,14 @@ var promoCodeController = {
         }
         const promoCode = req.body.promoCode;
         const userId = req.user._id;
-        // const todayDate = moment().unix();
-        const todayDate = 1534084022;
+        const todayDate = moment().unix();
+        // const todayDate = 1537986700; 
+        console.log('todayDate');
+        console.log(todayDate);
         var isUserFlag = 0;
         var isPromoCodeValidFlag = 0;
         var discount;
         var promoCodeId;
-        console.log(`today date ${todayDate}`);
         promoCodeModel.aggregate([
             {
                 $match : {
@@ -509,6 +517,8 @@ var promoCodeController = {
                 return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
 
             if(response.length > 0) {
+                console.log('response');
+                console.log(response);
                 response.map((data) => {
                     if(data.isUserExist == true) {
                         isUserFlag = 1;
@@ -521,11 +531,16 @@ var promoCodeController = {
                     
 
                 });
-                if(isUserFlag == 0) 
-                    return res.status(200).send({status : 0, data : {}, message : 'Promo Code does not exist user.'});  // user does not exist, but for security pupose we need to show message "promo code does not exist"
+                console.log(`${isUserFlag} ${isPromoCodeValidFlag}`);
+                if(isUserFlag == 0) {
+                    console.log('Promo Code does not exist user.');
+                    return res.status(200).send({status : 0, data : {}, message : 'Invalid Promo Code.'});  // user does not exist, but for security pupose we need to show message "promo code does not exist"
+                }
                 
-                if(isUserFlag == 1 && isPromoCodeValidFlag == 0)
-                    return res.status(200).send({status : 0, data : {}, message : 'Promo Code expired.'});  // user does not exist, but for security pupose we need to show message "promo code does not exist"
+                if(isUserFlag == 1 && isPromoCodeValidFlag == 0) {
+                    console.log('promo code not valid');
+                    return res.status(200).send({status : 0, data : {}, message : 'Invalid Promo Code.'});  // user does not exist, but for security pupose we need to show message "promo code does not exist"
+                }
                 
                 if(isUserFlag == 1 && isPromoCodeValidFlag == 1)
                     return res.status(200).send({status : 1, data : {discount : discount, promoCodeId : promoCodeId}, message : 'Promo Code applied successfully.'});
@@ -538,6 +553,46 @@ var promoCodeController = {
             }
         });
         
+    },
+    statusUpdate : (req, res) => {
+        var yesterdayDate = moment().subtract(1, 'days').toString();
+        var splitDate = yesterdayDate.toString().split(" ");
+        var onlyDate = `${splitDate[3]} ${splitDate[1]} ${splitDate[2]}`;
+        yesterdayDate = moment(onlyDate+" 23:59:59", 'YYYY-MMM-DD HH:mm:ss').unix();    // yesterday date end time.
+        promoCodeModel.aggregate([
+            {
+                $match : {
+                    endingDate : { $lte :  yesterdayDate},
+                    status : 1
+                }
+            }
+        ],(err, resp) => {
+            if(err)
+                return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
+            
+            if(resp.length > 0) {
+                var updations;
+                updations = resp.map((data) => {
+                    var conditions = { _id: data._id }
+                            , update = { status: 0, modifiedDate : moment().unix()}
+                            , options = { multi: true };
+                    promoCodeModel.update(conditions, update, options,(updateErr, updatedRecords) => {
+                        if(updateErr)
+                            return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
+                        if(updatedRecords) {
+                            console.log('updated records');
+                            console.log(data);
+                            return data;
+                        }
+                    });
+                });
+                // updatedRecords
+                return res.status(200).send({status : 1, data : updations, message : 'Promo Codes updated successfully.'});
+            }
+            else {
+                return res.status(200).send({status : 0, data : [], message : 'All promo codes already updated.'});
+            }
+        });
     }
 
 
