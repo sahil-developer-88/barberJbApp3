@@ -374,7 +374,7 @@ var promoCodeController = {
                                                 $lookup : {
                                                     from : 'users',
                                                     localField : 'userId',
-                                                    foreignField : '_id',
+                                                    foreignField : '_id', 
                                                     as : 'usersData'
                                                 }
                                             },
@@ -566,12 +566,12 @@ var promoCodeController = {
                     status : 1
                 }
             }
-        ],(err, resp) => {
+        ],(err, resp) => {  
             if(err)
-                return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
+                return res.status(errors.InternalServerError.code).send(errors.InternalServerError);  
             
             if(resp.length > 0) {
-                var updations;
+                var updations;   
                 updations = resp.map((data) => {
                     var conditions = { _id: data._id }
                             , update = { status: 0, modifiedDate : moment().unix()}
@@ -580,7 +580,7 @@ var promoCodeController = {
                         if(updateErr)
                             return res.status(errors.InternalServerError.code).send(errors.InternalServerError);
                         if(updatedRecords) {
-                            console.log('updated records');
+                            console.log('updated records'); 
                             console.log(data);
                             return data;
                         }
@@ -593,6 +593,27 @@ var promoCodeController = {
                 return res.status(200).send({status : 0, data : [], message : 'All promo codes already updated.'});
             }
         });
+    },
+    checkSmsService : (req, res) => {
+        console.log('sms api service');
+        // const accountSid = 'ACa78ab67536c5d6a7d04b2c0d4a40e69b';
+        // const authToken = 'c1fe3ba044fa97917fd123a44433faf7';
+        // const client = require('twilio')(accountSid, authToken);
+        // console.log('after');
+        
+
+        // client.sendMessage({
+        //     to : '+917973521784',
+        //     from : '+17314834989',   
+        //     body : 'hello world'
+        // }, function(err, data)  {
+        //     if(err)
+        //         console.log(err);
+
+        //     console.log(data);
+        //     res.json(data);
+        // })
+
     }
 
 

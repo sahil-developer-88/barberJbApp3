@@ -33,7 +33,7 @@ var frontController = {
                             
                             if(index == response.length-1) {
                                 newData.push(data);
-                                servicesListing = newData;
+                                servicesListing = newData;   
                                 res.send(servicesListing);
                             }
                             else {

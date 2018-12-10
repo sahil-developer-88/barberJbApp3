@@ -11,9 +11,9 @@ var frontController = {
             else
             {            
                 res.send({productDetails:''});
-            }
-        });
+            }    
+        });   
     }
-}
+}  
 
-module.exports = frontController;
+module.exports = frontController;   

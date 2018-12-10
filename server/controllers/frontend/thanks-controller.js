@@ -16,10 +16,8 @@ var frontController = {
             if(req.session.thanks == true)
             {
                 thanksValue=true;            
-                result={thanksValue: thanksValue};
+                result={thanksValue: thanksValue};  
                 res.send(result);
-    
-    
                 
             }
             else
@@ -27,7 +25,7 @@ var frontController = {
                 if(req.session.thanks == false)
                 {
                     thanksValue=false;                            
-                    result={thanksValue: thanksValue};
+                    result={thanksValue: thanksValue};   
                     res.send(result);                
                 }
             }

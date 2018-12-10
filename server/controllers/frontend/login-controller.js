@@ -4,13 +4,15 @@ module.exports = function(express) {
     const saltRounds = 10;
     const myPlaintextPassword = 's0/\/\P4$$w0rD';
     const passport=require('passport');
+    // const jwt = require('jsonwebtoken');
 
     router.post("/login",
     // passport.authenticate('local', { successRedirect : '/api/frontend/loginSuccess', failureRedirect: '/api/frontend/loginError' }));
     passport.authenticate('local', { failureRedirect: '/api/frontend/loginError' }), (req, res) => {
         console.log('login');
         console.log(req.user);
-        return res.status(200).send({ status : 1, message : req.user });
+        // const token = jwt.sign('sahil', 'secret_key');
+        return res.status(200).send({ status : 1, data : { user : req.user } });   
     });
 
     // router.get("/loginSuccess",(req, res)=>{

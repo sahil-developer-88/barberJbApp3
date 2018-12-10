@@ -1,13 +1,17 @@
 const paymentModel = require('../../database/models/payment');
 const mongoose = require('mongoose');
 const promoCodeModel = require('../../database/models/promoCodes');
-var paymentController = {
-    paymentStatus: function(req, res) {
+module.exports = function(express) {
+    const router = express.Router();
+    router.post('/paymentStatus',(req, res) => {
+        
         
         const users = require('../../database/models/userRegistration');
         const paymentModel = require('../../database/models/payment');
         const startIndex = parseInt(req.body.startIndex);
         const pageSize = parseInt(req.body.pageSize);
+        console.log('req.headers');
+        console.log(req.headers);
         console.log(req.body.startIndex);
         console.log(req.body.pageSize);
         paymentModel.aggregate([
@@ -50,10 +54,9 @@ var paymentController = {
             console.log(response);
             response.length > 0 ? res.status(200).send(response) : res.status(200).send([]);
         });
-        
-        
-    }, 
-    paymentCollectionLength : (req, res)  => {
+    });
+
+    router.get('/paymentCollectionLength',(req, res) => {
         const paymentModel = require('../../database/models/payment');
         paymentModel.find({},(err, docs) => {
             if(err)
@@ -66,8 +69,9 @@ var paymentController = {
             }
             
         });
-    },
-    serviceBookingPaymentDetails : (req, res) => {
+    });
+
+    router.post('/serviceBookingPaymentDetails',(req, res) => {
         const paymentModel = require('../../database/models/payment');
         const userModel = require('../../database/models/userRegistration');
         const serviceTypesModel = require('../../database/models/serviceTypes');
@@ -152,64 +156,9 @@ var paymentController = {
                 res.status(200).send(response[0]);
             }
         });
-    },
-    appointmentBookingPaymentDetails : (req, res) => {
-        const paymentModel = require('../../database/models/payment');
-        const userModel = require('../../database/models/userRegistration');
-        const serviceTypesModel = require('../../database/models/serviceTypes');
-        const appointmentModel = require('../../database/models/appointmentBookingList');
-        var paymentDetails, bookingServiceDetails;
+    });
+    router.post('/offlineBookingPaymentDetails',(req, res) => {
         
-        const mongoose = require('mongoose');
-
-        const _id = req.body._id;
-        const bookingType = req.body.bookingType;
-        paymentModel.aggregate([
-            {
-                $match : {
-                    _id : mongoose.Types.ObjectId(_id)
-                }
-            },
-            {    
-                $lookup : {
-                    from : 'users',
-                    localField : 'userId',
-                    foreignField: '_id',
-                    as : 'userDetails'
-                }
-            },
-            {
-                $unwind : '$userDetails'
-            },
-            {
-                $lookup : {
-                    from : 'appointment-booking-list',
-                    localField : 'appointmentId',
-                    foreignField : '_id',
-                    as : 'appointmentBookingDetails'
-                }
-            },  
-            {
-                $unwind : '$appointmentBookingDetails'
-            },
-            {
-                $project : {
-                    _id : 0,
-                    userDetails : { 'firstName' : '$userDetails.firstName', 'lastName' : '$userDetails.lastName', 'email' : '$userDetails.email', 'city' : '$userDetails.city', 'state' : '$userDetails.state', 'phoneNumber' : '$userDetails.phoneNumber' },
-                    paymentDetails : {bookingType : '$bookingType', bookingDate : '$bookingDate', successStatus : '$successStatus', createdDate : '$createdDate', timeSlot : '$timeSlot', 'successStatus' : '$successStatus', companyName : '$companyName', description : '$description'},
-                    appointmentBookingDetails : { duration : '$appointmentBookingDetails.duration', price : '$appointmentBookingDetails.price' }
-                }
-            }
-        ],(err, response) => {
-            if(err)
-                return err;
-            
-                console.log(response);
-            var paymentDetails = response[0];
-            res.status(200).send(paymentDetails);
-        });
-    },
-    offlineBookingPaymentDetails : (req, res) => {
         const paymentModel = require('../../database/models/payment');
         const userModel = require('../../database/models/userRegistration');
         var paymentDetails, bookingServiceDetails;
@@ -250,8 +199,8 @@ var paymentController = {
             var paymentDetails = response[0];
             res.status(200).send(paymentDetails);
         });
-    },
-    demoDetails : function(req, res) {
+    })
+    router.get('/demoDetails',(req,res) => {
         const paymentModel = require('../../database/models/payment');
         paymentModel.aggregate([
             {
@@ -265,8 +214,9 @@ var paymentController = {
                 res.json(data);
             }
         );
-    },
-    updateDetails : function(req, res) {
+    });
+    router.get('/updateDetails',(req, res) => {
+        
         const paymentModel = require('../../database/models/payment');
         const mongoose = require("mongoose");
         var date_format;
@@ -299,15 +249,14 @@ var paymentController = {
                 });
             }
         });
-    },
-    paymentDemo : (req, res) => {
-        
+    })
+    router.get('/paymentDemo',(req, res) => {
         console.log('hiiiiiiii paymentDemo');
         console.log(req.headers);
-            
-          
         // console.log(res.headers);
         res.json('yes');
-    }
-};
-module.exports = paymentController;
+    });
+    return router;
+}
+
+

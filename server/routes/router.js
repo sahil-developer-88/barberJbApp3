@@ -1,6 +1,8 @@
 var express = require('express');
+var passport = require('../database/passport.config');
 var exportedRoutes = function(app) {
     var routes = express.Router();
+    
 
     // FRONTEND CONTROLLERS
     var loginController = require('./../controllers/frontend/login-controller')(express);
@@ -57,17 +59,24 @@ var exportedRoutes = function(app) {
 
     // ******** BACKEND CONTROLLERS *************
 
-    var paymentController = require('./../controllers/backend/payment-controller');
-    routes.route('/api/backend/paymentStatus').post(paymentController.paymentStatus);
-    routes.route('/api/backend/paymentCollectionLength').get(paymentController.paymentCollectionLength);
-    routes.route('/api/backend/serviceBookingPaymentDetails').post(paymentController.serviceBookingPaymentDetails);
-    routes.route('/api/backend/appointmentBookingPaymentDetails').post(paymentController.appointmentBookingPaymentDetails);
-    routes.route('/api/backend/offlineBookingPaymentDetails').post(paymentController.offlineBookingPaymentDetails);
-    routes.route('/api/backend/demoDetails').get(paymentController.demoDetails);
-    routes.route('/api/backend/updateDetails').get(paymentController.updateDetails);    // demo function
-    routes.route('/api/backend/paymentDemo').get(paymentController.paymentDemo);
+    var paymentController = require('./../controllers/backend/payment-controller')(express);
+    
+    // app.use('/api/backend/paymentStatus', passport.authenticate('jwt', {session: false}), paymentController);
+
+    routes.use('/api/backend/payment',paymentController);
     
 
+
+    // routes.route('/api/backend/paymentStatus',paymentController.paymentStatus).post(paymentController.paymentStatus);
+    // routes.route('/api/backend/paymentCollectionLength').get(paymentController.paymentCollectionLength);
+    // routes.route('/api/backend/serviceBookingPaymentDetails').post(paymentController.serviceBookingPaymentDetails);
+    // routes.route('/api/backend/appointmentBookingPaymentDetails').post(paymentController.appointmentBookingPaymentDetails);
+    // routes.route('/api/backend/offlineBookingPaymentDetails').post(paymentController.offlineBookingPaymentDetails);
+    // routes.route('/api/backend/demoDetails').get(paymentController.demoDetails);
+    // routes.route('/api/backend/updateDetails').get(paymentController.updateDetails);    // demo function
+    // routes.route('/api/backend/paymentDemo').get(paymentController.paymentDemo);
+    
+    
     var categoryController = require('./../controllers/backend/category-controller');
     routes.route('/api/backend/categoryList').post(categoryController.categoryList);
     routes.route('/api/backend/categoryRecordsLength').get(categoryController.categoryRecordsLength);
@@ -76,6 +85,7 @@ var exportedRoutes = function(app) {
 
     var serviceController = require('./../controllers/backend/service-controller')(express);
     routes.use('/api/backend',serviceController);
+    
     // routes.route('/api/backend/serviceList').post(serviceController.serviceList);
     // routes.route('/api/backend/serviceRecordsLength').get(serviceController.serviceRecordsLength);
     // routes.route('/api/backend/categoriesList').get(serviceController.categoriesList);
@@ -90,8 +100,11 @@ var exportedRoutes = function(app) {
     routes.route('/api/backend/promoCodeCheck').post(promoCodeController.promoCodeCheck);
     routes.route('/api/backend/statusUpdate').get(promoCodeController.statusUpdate);
     routes.route('/api/backend/promoCodeUsersDetails').post(promoCodeController.promoCodeUsersDetails);
+    routes.route('/api/backend/checkSmsService').get(promoCodeController.checkSmsService);
     
-    
+    var signinController = require('./../controllers/backend/signin-controller')(express);
+    routes.use('/api/backend',signinController);
+
     return routes;
 }
 module.exports = exportedRoutes;

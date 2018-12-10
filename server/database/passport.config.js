@@ -3,6 +3,10 @@ const LocalStrategy =  require('passport-local').Strategy;
 const userModel = require('./models/userRegistration');
 const bcrypt = require('bcrypt-nodejs');
 
+const passportJWT = require("passport-jwt");
+const JWTStrategy   = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
+
 passport.serializeUser((user,done)=>{
     done(null,user.id);
 });
@@ -48,6 +52,22 @@ passport.use(new LocalStrategy(
             });
         });
     }
+));
+
+passport.use(new JWTStrategy({
+    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    secretOrKey   : 'your_jwt_secret'
+},
+function (jwtPayload, cb) {
+    console.log('jwt payload entry');
+    console.log(jwtPayload);
+    //find the user in db if needed
+    if (!jwtPayload) {
+        next(new Error("Permission denied."));
+        return;
+    }
+    next(null, jwtPayload);
+}
 ));
 
 module.exports=passport;
